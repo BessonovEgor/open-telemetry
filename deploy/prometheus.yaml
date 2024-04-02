@@ -1,0 +1,19 @@
+## This config should be used only if you want to use separate prometheus docker image
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'otel-collector'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['localhost:8888']
+
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node-exporter:9100']
+
+remote_write:
+  - url: 'https://prometheus-prod-24-prod-eu-west-2.grafana.net/api/prom/push'
+    basic_auth:
+      username: '1058561'
+      password: '<YOUR PROMETHEUS AUTHORIZATION TOKEN>'

@@ -1,0 +1,28 @@
+version: "3.8"
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib
+    container_name: otel-collector
+    environment:
+      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: 'https://trace-service:4318/v1/traces'
+      OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: 'https://metric-service:4318/v1/metrics'
+    volumes:
+      - ./deploy/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
+    ports:
+      - 13133:13133 # health_check extension
+      - 4317:4317 # OTLP gRPC receiver
+
+  node-exporter:
+    image: prom/node-exporter
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    container_name: exporter
+    command:
+      - --path.procfs=/host/proc
+      - --path.sysfs=/host/sys
+      - --collector.filesystem.ignored-mount-points
+      - ^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)
+    ports:
+      - 9100:9100
